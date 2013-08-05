@@ -70,9 +70,12 @@ Sec-WebSocket-Accept: {0}\r
 			while self.running:
 
 				try:
-					msg = self.queue.get(timeout=1)
+					msg = self.queue.get(timeout=10)
 
-					s.send(self.pack(msg))
+					try:
+						s.send(self.pack(msg))
+					except:
+						pass # Fail silently (Broken sockets)
 
 					time.sleep(0.1)
 				except queue.Empty:

@@ -39,13 +39,15 @@ class LiveRefreshServer(threading.Thread):
 		self.running = True
 
 		while self.running:
-			self.socket = SocketPkg.socket(SocketPkg.AF_INET, SocketPkg.SOCK_STREAM)
-			self.socket.setsockopt(SocketPkg.SOL_SOCKET, SocketPkg.SO_REUSEADDR, 1)
-			self.socket.settimeout(30)
-			
-			self.debug("LiveRefresh","Listening for incomming connections...")
-			
-			self.socket.bind(('', self.settings_port))
+
+			if self.socket == None:
+				self.socket = SocketPkg.socket(SocketPkg.AF_INET, SocketPkg.SOCK_STREAM)
+				self.socket.setsockopt(SocketPkg.SOL_SOCKET, SocketPkg.SO_REUSEADDR, 1)
+				self.socket.settimeout(30)
+				
+				self.debug("LiveRefresh","Listening for incomming connections...")
+				
+				self.socket.bind(('', self.settings_port))
 			
 			self.socket.listen(1)
 
