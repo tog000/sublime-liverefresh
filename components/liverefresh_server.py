@@ -62,6 +62,8 @@ class LiveRefreshServer(threading.Thread):
 					continue
 				else:
 					break # Break out of the while (server dies)
+			except:
+				pass # Fail silently
 			
 			self.debug("LiveRefresh","Incoming connection from {0}".format(addr))
 
