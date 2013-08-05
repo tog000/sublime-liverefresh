@@ -2,14 +2,19 @@
 Based on code by Brian Thorne 2012
  
 """
-
+from __future__ import print_function
 import socket
 import select
 import threading
 import time
 import base64
 import hashlib
-import queue
+try: import queue
+except ImportError:
+	try:
+		import Queue as queue
+	except ImportError:
+		print("LiveRefresh cannot start")
 
 class WebSocket(threading.Thread):
 
@@ -22,7 +27,7 @@ class WebSocket(threading.Thread):
 
 	def shutdown(self):
 		if self.is_alive():
-			self.debug("WebSocket","Shutting down Connection: {}".format(self))
+			self.debug("WebSocket","Shutting down Connection: {0}".format(self))
 			self.socket.close()
 			self.running = False
 			self.join()
@@ -41,7 +46,7 @@ class WebSocket(threading.Thread):
 
 			client_request = s.recv(4096)
 			if not client_request:
-				self.debug("WebSocket","Client {} disconnected.".format(self.addr))
+				self.debug("WebSocket","Client {0} disconnected.".format(self.addr))
 				#break
 
 			# get to the key
@@ -54,7 +59,7 @@ class WebSocket(threading.Thread):
 			header='''HTTP/1.1 101 Switching Protocols\r
 Upgrade: websocket\r
 Connection: Upgrade\r
-Sec-WebSocket-Accept: {}\r
+Sec-WebSocket-Accept: {0}\r
 \r
 '''.format(response_string)
 
@@ -125,10 +130,10 @@ Sec-WebSocket-Accept: {}\r
 			frame_head = s.recv(2)
 
 			# very first bit indicates if this is the final fragment
-			self.debug("WebSocket","final fragment: {}".format(self.is_bit_set(frame_head[0], 7)))
+			self.debug("WebSocket","final fragment: {0}".format(self.is_bit_set(frame_head[0], 7)))
 
 			# bits 4-7 are the opcode (0x01 -> text)
-			self.debug("WebSocket","opcode: {}".format(frame_head[0] & 0x0f))
+			self.debug("WebSocket","opcode: {0}".format(frame_head[0] & 0x0f))
 
 			# mask bit, from client will ALWAYS be 1
 			assert self.is_bit_set(frame_head[1], 7)
@@ -142,7 +147,7 @@ Sec-WebSocket-Accept: {}\r
 			elif payload_length == 127:
 				raw = s.recv(8)
 				payload_length = self.bytes_to_int(raw)
-			self.debug("WebSocket",'Payload is {} bytes'.format(payload_length))
+			self.debug("WebSocket",'Payload is {0} bytes'.format(payload_length))
 
 			"""masking key
 			All frames sent from the client to the server are masked by a
@@ -164,4 +169,4 @@ Sec-WebSocket-Accept: {}\r
 
 	def debug(self,prefix,msg):
 		if self.settings_debug:
-			print("[{}] {}".format(prefix,msg))
+			print("[{0}] {1}".format(prefix,msg))

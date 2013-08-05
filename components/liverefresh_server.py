@@ -1,3 +1,4 @@
+from __future__ import print_function
 import threading
 import socket as SocketPkg
 import select
@@ -17,7 +18,7 @@ class LiveRefreshServer(threading.Thread):
 
 	def shutdown(self):
 		if self.is_alive():
-			self.debug("LiveRefresh","Shutting down socketection: {}".format(self))
+			self.debug("LiveRefresh","Shutting down socketection: {0}".format(self))
 			self.socket.close()
 			self.running = False
 			self.join()
@@ -27,7 +28,7 @@ class LiveRefreshServer(threading.Thread):
 		for thread in self.active_connections:
 			if not thread.is_alive():
 				self.active_connections.remove(thread)
-				self.debug("LiveRefresh","Connection {} was dead, removing...".format(thread.socket));
+				self.debug("LiveRefresh","Connection {0} was dead, removing...".format(thread.socket));
 
 	def send_all(self,msg):
 		for thread in self.active_connections:
@@ -59,7 +60,7 @@ class LiveRefreshServer(threading.Thread):
 				else:
 					break # Break out of the while (server dies)
 			
-			self.debug("LiveRefresh","Incoming connection from {}".format(addr))
+			self.debug("LiveRefresh","Incoming connection from {0}".format(addr))
 
 			self.socket.setblocking(0)
 
@@ -71,4 +72,4 @@ class LiveRefreshServer(threading.Thread):
 
 	def debug(self,prefix,msg):
 		if self.settings_debug:
-			print("[{}] {}".format(prefix,msg))
+			print("[{0}] {1}".format(prefix,msg))

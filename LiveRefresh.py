@@ -1,6 +1,6 @@
 import sublime, sublime_plugin
 import time
-from .components.liverefresh_server import LiveRefreshServer
+from components.liverefresh_server import LiveRefreshServer
 
 class LiveRefresh(sublime_plugin.EventListener):  
 
@@ -8,6 +8,8 @@ class LiveRefresh(sublime_plugin.EventListener):
 
 	def __init__(self):
 		super(LiveRefresh,self).__init__()
+		if int(sublime.version()) < 3000:
+			self.start_server()
 
 	def start_server(self):
 		settings = sublime.load_settings('LiveRefresh.sublime-settings')
@@ -20,10 +22,11 @@ class LiveRefresh(sublime_plugin.EventListener):
 
 		# Assign to a "static" variable (why are callbacks being called on different instance of LiveRefresh?)
 		LiveRefresh.server_thread = server_thread
-
-	def on_post_save_async(self, view):
+		
+	def on_post_save(self, view):
 		LiveRefresh.server_thread.send_all("refresh")
 
+# For SublimeText v3
 def plugin_loaded():
 	lr = LiveRefresh()
 	lr.start_server()
