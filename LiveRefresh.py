@@ -1,6 +1,8 @@
 import sublime, sublime_plugin
 import time
-from components.liverefresh_server import LiveRefreshServer
+try: from .components.liverefresh_server import LiveRefreshServer
+except ValueError:
+	from components.liverefresh_server import LiveRefreshServer
 
 class LiveRefresh(sublime_plugin.EventListener):  
 

@@ -52,7 +52,7 @@ class LiveRefreshServer(threading.Thread):
 			
 			self.socket.listen(1)
 
-			self.cleanup_connections()
+			#self.cleanup_connections()
 
 			try:
 				socket, addr = self.socket.accept()
@@ -61,13 +61,13 @@ class LiveRefreshServer(threading.Thread):
 					# We just exceeded the timeout on socketects
 					continue
 				else:
-					break # Break out of the while (server dies)
+					break # Break out of the while (Server dies)
 			except:
-				pass # Fail silently
+				continue # Fail silently (Broken pipe)
 			
 			self.debug("LiveRefresh","Incoming connection from {0}".format(addr))
 
-			self.socket.setblocking(0)
+			#self.socket.setblocking(0)
 
 			socket_thread = WebSocket(socket,addr, self.settings_debug)
 			#socket_thread.setDaemon(True)
