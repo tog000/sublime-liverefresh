@@ -1,7 +1,7 @@
 Live Refresh
 ============
 
-Live Refresh is a [Sublime Text 3](http://www.sublimetext.com/3) plugin that automatically refreshes websites after a file is saved.
+Live Refresh is a [Sublime Text 2](http://www.sublimetext.com)/[3](http://www.sublimetext.com/3) plugin that automatically refreshes websites after a file is saved.
 
 Installation
 ------------
