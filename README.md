@@ -6,7 +6,7 @@ Live Refresh is a [Sublime Text 3](http://www.sublimetext.com/3) plugin that aut
 Installation
 ------------
 
-1. Using Sublime [Package Control](http://wbond.net/sublime_packages/package_control/installation) *this doesn't work yet*:
+1. Using Sublime [Package Control](http://wbond.net/sublime_packages/package_control/installation) __*this doesn't work yet*__:
 
   a) Press `ctrl+shift+p`(Windows, Linux) or `cmd+shift+p`(OS X).
   
@@ -50,10 +50,8 @@ The plugin configuration can be found in the file `LiveRefresh.sublime-settings`
 TODO
 ----
 
-- [x] Make WebSockets work with Python
-- [x] Add on\_post\_save hooks for Sublime Text
-- [ ] Add filters for multiple websites being editted at the same time
-- [ ] Add compiler support for generated files (less)
+* Add filters for multiple websites being editted at the same time
+* Add compiler support for generated files (less)
 
 
 
