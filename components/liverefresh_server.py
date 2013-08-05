@@ -37,6 +37,7 @@ class LiveRefreshServer(threading.Thread):
 	def run(self):
 
 		self.running = True
+		self.socket = None
 
 		while self.running:
 
