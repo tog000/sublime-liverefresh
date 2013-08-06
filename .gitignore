@@ -2,3 +2,5 @@ project.sublime-project
 project.sublime-workspace
 *.pyc
 node_modules
+Gruntfile.js
+jshintrc
