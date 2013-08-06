@@ -6,19 +6,21 @@ Live Refresh is a [Sublime Text 2](http://www.sublimetext.com) and [3](http://ww
 Installation
 ------------
 
-1. Using Sublime [Package Control](http://wbond.net/sublime_packages/package_control/installation) __*this doesn't work yet*__:
+1. Clone this repository into your `sublime-text-3/Packages/` directory:
 
-  a) Press `ctrl+shift+p`(Windows, Linux) or `cmd+shift+p`(OS X).
-  
-  b) Type install, then press enter with Package Control: Install Package selected.
-  
-  c) Type Live Refresh, then press enter with the Live Refresh plugin selected.
+   ```git clone https://github.com/tog000/sublime-liverefresh LiveRefresh```
 
 2. Add the following code to the website you want to refresh:
 ```html
 <script type="text/javascript" src="http://localhost:9999/liverefresh.min.js"></script>
 <script> LiveRefresh() </script>
 ```
+
+3. Restart Sublime Text
+
+4. Refresh the website (you should see a blue rectangle on the top right edge of the page)
+
+From now on, every time a file is saved, the website will be refreshed.
 
 Settings
 --------
