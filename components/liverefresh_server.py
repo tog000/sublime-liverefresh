@@ -3,7 +3,7 @@ import threading
 import socket as SocketPkg
 import select
 import time
-from .websocket import WebSocket
+from .connection import Connection
 
 class LiveRefreshServer(threading.Thread):
 
@@ -34,7 +34,7 @@ class LiveRefreshServer(threading.Thread):
 		for thread in self.active_connections:
 			thread.send(msg)
 
-	def run(self):
+	def run(self): 
 
 		self.running = True
 		self.socket = None
@@ -69,7 +69,7 @@ class LiveRefreshServer(threading.Thread):
 
 			#self.socket.setblocking(0)
 
-			socket_thread = WebSocket(socket,addr, self.settings_debug)
+			socket_thread = Connection(socket,addr, self.settings_debug)
 			#socket_thread.setDaemon(True)
 			socket_thread.start()
 

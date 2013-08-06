@@ -2,11 +2,11 @@ var LiveRefresh = function(options){
 
 	var defaults = {
 		debug: true,
-		debug_level: 1,
+		debug_level: 0,
 		notification_timeout: 10,
 		port: 9999
 	};
-	
+
 	// Process overrides
 	this.options = options?options:{};
 	for(var key in defaults){
@@ -85,5 +85,3 @@ LiveRefresh.prototype = {
 		}
 	}
 };
-
-var lr = new LiveRefresh();
