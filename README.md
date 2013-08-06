@@ -16,7 +16,7 @@ Installation
 
 2. Add the following code to the website you want to refresh:
 ```html
-<script type="text/javascript" src="js/liverefresh.js"></script>
+<script type="text/javascript" src="http://localhost:9999/liverefresh.min.js"></script>
 <script> LiveRefresh() </script>
 ```
 
