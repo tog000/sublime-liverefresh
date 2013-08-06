@@ -4,76 +4,46 @@ import socket as SocketPkg
 import select
 import time
 from .connection import Connection
+import logging
+try: import queue
+except ImportError:
+	try:
+		import Queue as queue
+	except ImportError:
+		print("LiveRefresh cannot start")
 
 class LiveRefreshServer(threading.Thread):
 
+	counter = 0
+
 	def __init__(self,port=9999,debug=False):
-		threading.Thread.__init__(self)
-		
-		self.active_connections = []
-		
+		super(LiveRefreshServer, self).__init__()
 		self.settings_debug = debug
 		self.settings_port = port
+		self.active_connections = []
 
+	def run(self):
+		self.socket = SocketPkg.socket(SocketPkg.AF_INET, SocketPkg.SOCK_STREAM)
+		self.socket.setsockopt(SocketPkg.SOL_SOCKET, SocketPkg.SO_REUSEADDR, 1)
+		
+		self.socket.bind(('', self.settings_port))
+		self.socket.listen(1)
 
-	def shutdown(self):
-		if self.is_alive():
-			self.debug("LiveRefresh","Shutting down socketection: {0}".format(self))
-			self.socket.close()
-			self.running = False
-			self.join()
+		self.debug("LiveRefresh","Listening for incomming connections...")
 
-	def cleanup_connections(self):
-
-		for thread in self.active_connections:
-			if not thread.is_alive():
-				self.active_connections.remove(thread)
-				self.debug("LiveRefresh","Connection {0} was dead, removing...".format(thread.socket));
+		while True:
+			try:
+				new_socket, addr = self.socket.accept()
+				LiveRefreshServer.counter += 1
+				new_thread = Connection(new_socket,self.settings_debug)
+				new_thread.start()
+				self.active_connections.append(new_thread.queue)
+			except:
+				logging.exception("Catched error while waiting for connections")
 
 	def send_all(self,msg):
-		for thread in self.active_connections:
-			thread.send(msg)
-
-	def run(self): 
-
-		self.running = True
-		self.socket = None
-
-		while self.running:
-
-			if self.socket == None:
-				self.socket = SocketPkg.socket(SocketPkg.AF_INET, SocketPkg.SOCK_STREAM)
-				self.socket.setsockopt(SocketPkg.SOL_SOCKET, SocketPkg.SO_REUSEADDR, 1)
-				self.socket.settimeout(30)
-				
-				self.debug("LiveRefresh","Listening for incomming connections...")
-				
-				self.socket.bind(('', self.settings_port))
-			
-			self.socket.listen(1)
-
-			#self.cleanup_connections()
-
-			try:
-				socket, addr = self.socket.accept()
-			except SocketPkg.timeout:
-				if self.running:
-					# We just exceeded the timeout on socketects
-					continue
-				else:
-					break # Break out of the while (Server dies)
-			except:
-				continue # Fail silently (Broken pipe)
-			
-			self.debug("LiveRefresh","Incoming connection from {0}".format(addr))
-
-			#self.socket.setblocking(0)
-
-			socket_thread = Connection(socket,addr, self.settings_debug)
-			#socket_thread.setDaemon(True)
-			socket_thread.start()
-
-			self.active_connections.append(socket_thread)
+		for queue in self.active_connections:
+				queue.put_nowait(msg)
 
 	def debug(self,prefix,msg):
 		if self.settings_debug:

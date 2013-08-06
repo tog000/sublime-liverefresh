@@ -23,13 +23,13 @@ LiveRefresh.prototype = {
 	
 	init: function() {
 
-		var websocket = new WebSocket("ws://"+window.location.hostname+":"+this.options.port);
+		this.websocket = new WebSocket("ws://"+window.location.hostname+":"+this.options.port);
 
 		var self = this;
 
-		websocket.onopen = function(event){ LiveRefresh.prototype.on_open.call(self,event); };
-		websocket.onclose = function(event){ LiveRefresh.prototype.on_close.call(self,event); };
-		websocket.onmessage = function(event){ LiveRefresh.prototype.on_message.call(self,event); };
+		this.websocket.onopen = function(event){ LiveRefresh.prototype.on_open.call(self,event); };
+		this.websocket.onclose = function(event){ LiveRefresh.prototype.on_close.call(self,event); };
+		this.websocket.onmessage = function(event){ LiveRefresh.prototype.on_message.call(self,event); };
 	},
 
 	add_timer: function(){
@@ -74,6 +74,7 @@ LiveRefresh.prototype = {
 	on_message: function(event){
 		this.debug("Message received: " + event.data);
 		if(event.data == "refresh"){
+			this.websocket.close()
 			location.reload();
 		}
 	},

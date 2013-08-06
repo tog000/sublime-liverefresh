@@ -19,7 +19,7 @@ class LiveRefresh(sublime_plugin.EventListener):
 		debug = settings.get('debug') == "True"
 
 		server_thread = LiveRefreshServer(port=port, debug=debug)
-		#self.server_thread.setDaemon(True)
+		server_thread.setDaemon(True)
 		server_thread.start()
 
 		# Assign to a "static" variable (why are callbacks being called on different instance of LiveRefresh?)

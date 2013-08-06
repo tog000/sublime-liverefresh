@@ -4,7 +4,7 @@ Based on code by Brian Thorne 2012
 """
 from __future__ import print_function
 import socket
-import array
+import logging
 import select
 import threading
 import time
@@ -20,48 +20,36 @@ except ImportError:
 
 class Connection(threading.Thread):
 
-	def __init__(self,socket,addr,debug=False):
+	def __init__(self,socket,debug=False):
 		super(Connection, self).__init__()
 		self.socket = socket
-		self.addr = addr
 		self.settings_debug = debug
 		self.queue = queue.Queue()
 
-	def shutdown(self):
-		if self.is_alive():
-			self.debug("Connection","Shutting down: {0}".format(self))
-			self.socket.close()
-			self.running = False
-			self.join() 
-
-	def send(self,msg):
-		self.queue.put_nowait(msg)
-
 	def run(self):
-
-		to_read,to_write,exception = select.select([self.socket],[],[],0.5)
-
-		if len(to_read)>0:
-
+		
+		to_read,to_write,exception = select.select([self.socket],[],[])
+		
+		for ready_socket in to_read:
 			header = self.socket.recv(4096)
 
+			if not header: return;
+
 			# Determine if we want to send file or open websocket
-			if header.find(b'GET') == 0 and header.find(b'liverefresh') > 0:
+			if header.find(b'GET') == 0 and header.find(b'js') > 0:
 				self.serve_file(header)
 			else:
 				self.start_websocket(header)
-		else:
-			self.socket.close()
 
 	def serve_file(self,header):
 		parts = str(header).split(' ')
-		if parts[1].find(".js") >= 0:
+		if parts[1].find(".js") >= 0: 
 			
-			#if int(sublime.version()) < 3000:
-			#	path = "{0}/LiveRefresh/js/liverefresh.js".format(sublime.packagesPath())
-			#else:
-			path = "{0}/LiveRefresh/js{1}".format(sublime.packages_path(),parts[1])
-			with open(path) as f:
+			filename = parts[1][parts[1].rfind("/")+1:]
+
+			path = "{0}/LiveRefresh/js/{1}".format(sublime.packages_path(),filename)
+
+			with open(path) as f: 
 				contents = f.read()
 				
 			header='''HTTP/1.1 200 OK\r
@@ -74,16 +62,15 @@ Content-Length: {0}\r
 
 			self.socket.send(header.encode('utf_8'))
 
-			self.debug("Connection","Served Javascript file via GET.")
-
-			self.socket.close()
+			self.debug("Connection","Served javascript file: {0}".format(filename))
+	
 
 	def start_websocket(self,header):
 
 		self.debug("WebSocket","Initializing WebSocket...")
 
 		if not header:
-			self.debug("WebSocket","Client {0} disconnected.".format(self.addr))
+			self.debug("WebSocket","Client {0} disconnected.".format(self.socket))
 			return
 
 		# get to the key
@@ -103,23 +90,25 @@ Sec-WebSocket-Accept: {0}\r
 \r
 '''.format(response_string)
 
-		self.socket.send(header.encode())
+		self.socket.sendall(header.encode())
 		self.running = True
 
-		self.debug("WebSocket","Connection established.")
+		self.debug("WebSocket","Connection established {0}.".format(self.socket))
 
 		while self.running:
 
 			try:
-				msg = self.queue.get(timeout=10)
+
+				msg = self.queue.get()
 
 				try:
-					self.socket.send(self.pack(msg))
+					self.socket.sendall(self.pack(msg))
 				except:
-					pass # Fail silently (Broken sockets)
+					logging.exception("Catched error. Sending through WebSocket")
+					break
 
-				time.sleep(0.1)
 			except queue.Empty:
+				logging.exception("Catched error. Message queue was empty")
 				pass
 
 	def calculate_websocket_hash(self,key):
@@ -143,7 +132,6 @@ Sec-WebSocket-Accept: {0}\r
 
 
 	def pack(self,data):
-		"""pack bytes for sending to client"""
 		frame_head = bytearray(2)
 
 		# set final fragment
@@ -163,8 +151,7 @@ Sec-WebSocket-Accept: {0}\r
 
 	def receive(self,s):
 		
-		"""receive data from client"""
-		to_read,to_write,exception = select.select([self.socket],[],[],0.1)
+		to_read,to_write,exception = select.select([self.request],[],[],0.1)
 
 		if len(to_read)>0:
 
@@ -191,10 +178,7 @@ Sec-WebSocket-Accept: {0}\r
 				payload_length = self.bytes_to_int(raw)
 			self.debug("WebSocket",'Payload is {0} bytes'.format(payload_length))
 
-			"""masking key
-			All frames sent from the client to the server are masked by a
-			32-bit nounce value that is contained within the frame
-			"""
+			
 			masking_key = s.recv(4)
 			self.debug("WebSocket","mask: ", masking_key,self.bytes_to_int(masking_key))
 
